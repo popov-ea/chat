@@ -1,4 +1,4 @@
-﻿using Domain.Adapters.Repositories;
+﻿using Domain.Interfaces.Repositories;
 using Domain.Entities;
 using System;
 using System.Collections.Generic;

@@ -1,4 +1,4 @@
-﻿using Domain.Adapters.Repositories;
+﻿using Domain.Interfaces.Repositories;
 using Domain.Entities;
 using Domain.Enums;
 using Domain.Services.Dtos;
@@ -30,7 +30,9 @@ namespace Domain.Services
 			var created = _blackListRepository.Create(new BlackList
 			{
 				Initiator = initiator,
-				Blocked = toBlock
+				Blocked = toBlock,
+				InitiatorId = initiator.Id,
+				BlockedId = toBlock.Id
 			});
 
 			return Ok(created);
@@ -51,6 +53,12 @@ namespace Domain.Services
 		{
 			var found = await _blackListRepository.FirstOrDefaultAsync(bl => bl.Initiator.Id == initiator.Id && bl.BlockedId == blocked.Id);
 			return found != null;
+		}
+
+		public async Task<bool> CheckAnyBlocked(User mightBeBlocked, IEnumerable<User> mightBlock)
+		{
+			var mightBlockIds = mightBlock.Select((u) => u.Id);
+			return await _blackListRepository.AnyAsync((bl) => bl.BlockedId == mightBeBlocked.Id && mightBlockIds.Contains(bl.InitiatorId));
 		}
 
 		private BlackListResult Fail(BlackListFailCauses failCause)

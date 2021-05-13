@@ -6,6 +6,8 @@ namespace Domain.Entities
 {
 	public class BlackList : IEntity
 	{
+		public long Id { get; set; }
+
 		public long InitiatorId { get; set; }
 		public User Initiator { get; set; }
 

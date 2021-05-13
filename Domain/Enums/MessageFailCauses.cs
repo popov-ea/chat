@@ -9,6 +9,6 @@ namespace Domain.Enums
 		/// <summary>
 		/// error while working with attachments
 		/// </summary>
-		FileSaveFailed
+		AttachmentSaveFailed
 	}
 }

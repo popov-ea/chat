@@ -1,5 +1,5 @@
-﻿using Domain.Adapters.Providers;
-using Domain.Adapters.Repositories;
+﻿using Domain.Interfaces.Providers;
+using Domain.Interfaces.Repositories;
 using Domain.Entities;
 using Domain.Enums;
 using Domain.Services.Dtos;
@@ -14,26 +14,25 @@ namespace Domain.Services
 	public class ConversationService
 	{
 		private readonly IRepository<Conversation> _conversationRepository;
-		private readonly IRepository<ConversationUser> _conversationUserRepository;
-		private readonly IRepository<BlackList> _blackListRepository;
 		private readonly IRepository<ChatAction> _chatActionRepository;
+		private readonly IRepository<ConversationUser> _conversationUserRepository;
 		private readonly ITimeProvider _timeProvider;
 		private readonly MessageService _messageService;
+		private readonly BlackListService _blackListService;
 
 		// :/
-		public ConversationService(IRepository<Conversation> conversationRepository, IRepository<ConversationUser> conversationUserRepository, 
-			IRepository<BlackList> blackListrepository, IRepository<ChatAction> chatActionRepository,
-			MessageService messageService, ITimeProvider timeProvider)
+		public ConversationService(IRepository<Conversation> conversationRepository, IRepository<ConversationUser> conversationUserRepository,
+			IRepository<ChatAction> chatActionRepository, BlackListService blackListService, MessageService messageService, ITimeProvider timeProvider)
 		{
 			_conversationRepository = conversationRepository;
-			_conversationUserRepository = conversationUserRepository;
-			_blackListRepository = blackListrepository;
 			_chatActionRepository = chatActionRepository;
 			_timeProvider = timeProvider;
 			_messageService = messageService;
+			_conversationUserRepository = conversationUserRepository;
+			_blackListService = blackListService;
 		}
 
-		public async Task<ConversationServiceResult> CreateConversation(User initiator, IEnumerable<User> invitedUsers, string name = null)
+		public async Task<ConversationServiceResult> CreateConversationAsync(User initiator, IEnumerable<User> invitedUsers, string name = null)
 		{
 			var allUsers = invitedUsers.Union(new[] { initiator });
 
@@ -42,7 +41,7 @@ namespace Domain.Services
 				return Fail(ConversationFailCause.NoUsersInvited);
 			}
 
-			if (DidAnyoneBlock(invitedUsers, initiator))
+			if (await DidAnyoneBlock(invitedUsers, initiator))
 			{
 				return Fail(ConversationFailCause.BlockedUser);
 			}
@@ -52,38 +51,56 @@ namespace Domain.Services
 				name = GenerateConversationName(allUsers);
 			}
 
-			var conversation = await _conversationRepository.CreateAsync(new Conversation { Name = name, Owner = initiator });
+			var conversation = await _conversationRepository.CreateAsync(new Conversation { Name = name, Owner = initiator, OwnerId = initiator.Id });
 
-			await _conversationUserRepository.CreateManyAsync(allUsers.Select(u => new ConversationUser { Conversation = conversation, User = u }));
-			await _chatActionRepository.CreateAsync(new ChatAction { Initiator = initiator, CreatedAt = _timeProvider.NowUtc(), Type = ChatActionType.NewChat });
+			await _conversationUserRepository.CreateManyAsync(allUsers.Select(u => new ConversationUser { Conversation = conversation, User = u, UserId = u.Id }));
+			await _chatActionRepository.CreateAsync(new ChatAction { InitiatorId = initiator.Id, CreatedAt = _timeProvider.NowUtc(), Type = ChatActionType.NewChat });
 
-			return Ok(conversation);
+			var methodResult = Ok(conversation);
+
+			return methodResult;
 		}
 
-		public async Task<ConversationServiceResult> DeleteConversation(Conversation conversation)
+		public async Task<ConversationServiceResult> DeleteConversationAsync(User actor, Conversation conversation)
 		{
-			ClearConversation(conversation);
+			if (!IsOwner(conversation, actor))
+			{
+				return Fail(ConversationFailCause.NoPermissions);
+			}
+			
+			ClearConversationAsync(actor, conversation);
 
 			var conversationUsers = _conversationUserRepository.AllAsync(cu => cu.ConversationId == conversation.Id);
 			var chatActionsAsync =  _chatActionRepository.AllAsync(a => a.ConversationId == conversation.Id);
+			var chatMessages = _messageService.GetMessagesByConversationId(conversation.Id);
 
 			await _conversationUserRepository.DeleteByIdsAsync((await conversationUsers).Select(c => c.Id).ToArray());
 			await _chatActionRepository.DeleteByIdsAsync((await chatActionsAsync).Select(a => a.Id).ToArray());
+			await _messageService.DeleteByIdsAsync(actor, (await chatMessages).Select(a => a.Id).ToArray());
 
 			var deleted = await _conversationRepository.DeleteAsync(conversation);
 
-			return Ok(deleted);
+			var methodResult = Ok(deleted);
+
+			return methodResult;
 		}
 
-		public async Task<ConversationServiceResult> ClearConversation(Conversation conversation)
+		public async Task<ConversationServiceResult> ClearConversationAsync(User actor, Conversation conversation)
 		{
-			await _messageService.DeleteAsync(conversation.Messages.Select(m => m.Id).ToArray());
+			if (!IsOwner(conversation, actor))
+			{
+				return Fail(ConversationFailCause.NoPermissions);
+			}
+			await _messageService.DeleteByIdsAsync(actor, conversation.Messages.Select(m => m.Id).ToArray());
+
+			var methodResult = Ok(await _conversationRepository.FindAsync(conversation.Id));
+
 			return Ok(await _conversationRepository.FindAsync(conversation.Id));
 		}
 
 		private string GenerateConversationName(IEnumerable<User> users)
 		{
-			return string.Concat(users.Select(u => u.Username), " ");
+			return string.Concat(users.Select(u => u.Username ?? ""), " ");
 		}
 
 		private ConversationServiceResult Fail(ConversationFailCause failCause)
@@ -104,10 +121,14 @@ namespace Domain.Services
 			};
 		}
 
-		private bool DidAnyoneBlock(IEnumerable<User> users, User maybeBlocked)
+		private async Task<bool> DidAnyoneBlock(IEnumerable<User> users, User maybeBlocked)
+		{;
+			return await _blackListService.CheckAnyBlocked(maybeBlocked, users);
+		}
+
+		private bool IsOwner(Conversation conversation, User maybeOwner)
 		{
-			var usersIds = users.Select(u => u.Id);
-			return _blackListRepository.Any(bl => bl.BlockedId == maybeBlocked.Id && usersIds.Contains(bl.InitiatorId));
+			return conversation.OwnerId == maybeOwner.Id;
 		}
 	}
 }

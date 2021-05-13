@@ -1,5 +1,5 @@
-﻿using Domain.Adapters.Providers;
-using Domain.Adapters.Repositories;
+﻿using Domain.Interfaces.Providers;
+using Domain.Interfaces.Repositories;
 using Domain.Entities;
 using Domain.Enums;
 using Domain.Services.Dtos;
@@ -26,33 +26,54 @@ namespace Domain.Services
 			_attachmentContentProvider = attachmentContentProvider;
 		}
 
-		public async Task<MessageServiceResult> DeleteAsync(params long[] messageIds)
+		public async Task<MessageServiceResult> DeleteByIdsAsync(User actor, params long[] messageIds)
 		{
 			await _messageRepository.DeleteByIdsAsync(messageIds);
-			return Ok(null); // :(
+			var attachments = await GetMessagesAttachments(messageIds);
+			await _attachmentRepository.DeleteByIdsAsync(attachments.Select(a => a.Id).ToArray());
+
+			var methodResult = Ok(null);
+
+			return methodResult;
 		}
 
-		public async Task<MessageServiceResult> SendMessage(User sender, Conversation conversation, string messageText, Attachment[] attachments = new Attachment[])
+		public async Task<MessageServiceResult> SendMessageAsync(User sender, Conversation conversation, string messageText, Attachment[] attachments = null)
 		{
-			var newMsgAsync = _messageRepository.CreateAsync(new Message 
+			if (attachments != null)
 			{
-				Sender = sender, 
-				Conversation = conversation, 
-				Attachments = attachments.ToList(), 
-				CreatedAt = _timeProvider.NowUtc() 
+				try
+				{
+					var attachmentLoadAsync = attachments.Select(a => _attachmentContentProvider.DidUpload(a) ? Task.CompletedTask : _attachmentContentProvider.WaitForContentLoading(a));
+					Task.WaitAll(attachmentLoadAsync.ToArray());
+					await _attachmentRepository.CreateManyAsync(attachments);
+				}
+				catch
+				{
+					return Fail(MessageFailCauses.AttachmentSaveFailed);
+				}
+			}
+
+			var newMsg = await _messageRepository.CreateAsync(new Message
+			{
+				Sender = sender,
+				Conversation = conversation,
+				Attachments = attachments.ToList(),
+				CreatedAt = _timeProvider.NowUtc()
 			});
 
-			try
-			{
-				var attachmentLoadAsync = attachments.Select(a => _attachmentContentProvider.DidUpload(a) ? Task.CompletedTask : _attachmentContentProvider.WaitForContentLoading(a));
-				Task.WaitAll(attachmentLoadAsync.ToArray());
-			}
-			catch
-			{
-				return Fail(MessageFailCauses.FileSaveFailed);
-			}
+			var methodResult = Ok(newMsg);
 
-			return Ok(await newMsgAsync);
+			return methodResult;
+		}
+
+		public async Task<IEnumerable<Message>> GetMessagesByConversationId(long conversationId)
+		{
+			return await _messageRepository.AllAsync((m) => m.ConversationId == conversationId);
+		}
+
+		private async Task<IEnumerable<Attachment>> GetMessagesAttachments(params long[] messageIds)
+		{
+			return await _attachmentRepository.AllAsync((a) => messageIds.Contains(a.MessageId));
 		}
 
 		private MessageServiceResult Ok(Message msg)

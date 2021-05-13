@@ -14,5 +14,9 @@ namespace Domain.Enums
 		/// One or more users has blocked current user
 		/// </summary>
 		BlockedUser,
+		/// <summary>
+		/// User has no permissions for action
+		/// </summary>
+		NoPermissions,
 	}
 }

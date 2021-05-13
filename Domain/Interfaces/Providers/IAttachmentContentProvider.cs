@@ -5,7 +5,7 @@ using System.IO;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Domain.Adapters.Providers
+namespace Domain.Interfaces.Providers
 {
 	/// <summary>
 	/// Use it to implement file storage logic

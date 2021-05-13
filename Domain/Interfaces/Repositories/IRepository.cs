@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Domain.Adapters.Repositories
+namespace Domain.Interfaces.Repositories
 {
 	public interface IRepository<T> where T : IEntity
 	{
