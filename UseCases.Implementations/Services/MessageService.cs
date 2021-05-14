@@ -1,15 +1,15 @@
-﻿using Domain.Interfaces.Providers;
-using Domain.Interfaces.Repositories;
-using Domain.Entities;
+﻿using Domain.Entities;
 using Domain.Enums;
-using Domain.Services.Dtos;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using UseCases.Interfaces.Dtos;
+using DataAccess.Interfaces;
+using UseCases.Interfaces.Providers;
 
-namespace Domain.Services
+namespace UseCases.Implementation.Services
 {
 	public class MessageService
 	{

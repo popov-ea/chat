@@ -1,13 +1,12 @@
-using Domain.Services;
 using System;
 using Xunit;
-using Domain.Interfaces.Repositories;
 using Domain.Entities;
 using System.Threading.Tasks;
 using System.Collections.Generic;
 using System.Linq;
+using UseCases.Implementation.Services;
 
-namespace Domain.Test
+namespace UseCases.Test
 {
 	public class BlackListServiceTest
 	{

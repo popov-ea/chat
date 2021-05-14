@@ -1,12 +1,12 @@
 ﻿using Domain.Entities;
-using Domain.Services;
 using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
+using UseCases.Implementation.Services;
 using Xunit;
 
-namespace Domain.Test
+namespace UseCases.Test
 {
 	class MessageServiceTests
 	{

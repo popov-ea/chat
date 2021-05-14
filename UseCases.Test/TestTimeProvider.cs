@@ -1,9 +1,9 @@
-﻿using Domain.Interfaces.Providers;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using UseCases.Interfaces.Providers;
 
-namespace Domain.Test
+namespace UseCases.Test
 {
 	class TestTimeProvider : ITimeProvider
 	{

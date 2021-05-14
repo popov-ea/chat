@@ -1,14 +1,14 @@
-﻿using Domain.Interfaces.Repositories;
+﻿using DataAccess.Interfaces;
 using Domain.Entities;
 using Domain.Enums;
-using Domain.Services.Dtos;
+using UseCases.Interfaces.Dtos;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Domain.Services
+namespace UseCases.Implementation.Services
 {
 	public class BlackListService
 	{

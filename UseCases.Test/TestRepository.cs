@@ -1,12 +1,12 @@
-﻿using Domain.Entities;
-using Domain.Interfaces.Repositories;
+﻿using DataAccess.Interfaces;
+using Domain.Entities;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Domain.Test
+namespace UseCases.Test
 {
 	class TestRepository<T> : IRepository<T>
 		where T : IEntity

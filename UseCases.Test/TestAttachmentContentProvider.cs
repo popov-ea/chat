@@ -1,12 +1,12 @@
 ﻿using Domain.Entities;
-using Domain.Interfaces.Providers;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
 using System.Threading.Tasks;
+using UseCases.Interfaces.Providers;
 
-namespace Domain.Test
+namespace UseCases.Test
 {
 	class TestAttachmentContentProvider : IAttachmentContentProvider
 	{
