@@ -6,7 +6,7 @@ using System.Text;
 
 namespace UseCases.Interfaces.Dtos
 {
-	public class MessageServiceResult : EntityManipulationResult<Message, MessageFailCauses>
+	public class BlackListResultDto : EntityManipulationResultDto<BlackListDto, BlackListFailCauses>
 	{
 	}
 }

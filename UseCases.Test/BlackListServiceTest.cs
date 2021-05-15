@@ -5,11 +5,19 @@ using System.Threading.Tasks;
 using System.Collections.Generic;
 using System.Linq;
 using UseCases.Implementation.Services;
+using AutoMapper;
+using UseCases.Implementations;
+using UseCases.Interfaces.Dtos;
 
 namespace UseCases.Test
 {
 	public class BlackListServiceTest
 	{
+		private readonly Mapper _mapper;
+		public BlackListServiceTest()
+		{
+			_mapper = MapperHelpers.GetConfiguredMapper();
+		}
 		[Fact]
 		public async Task ShouldBlockUser()
 		{
@@ -27,9 +35,9 @@ namespace UseCases.Test
 				initiator,
 				blocked
 			});
-			var blackListService = new BlackListService(blackListRepository);
+			var blackListService = new BlackListService(blackListRepository, _mapper);
 
-			await blackListService.BlockUserAsync(initiator, blocked);
+			await blackListService.BlockUserAsync(_mapper.Map<User, UserDto>(initiator), _mapper.Map<User, UserDto>(blocked));
 
 			Assert.True(blackListRepository.Any(bl => bl.InitiatorId == initiator.Id && bl.BlockedId == blocked.Id));
 		}
@@ -61,9 +69,9 @@ namespace UseCases.Test
 					InitiatorId = initiator.Id
 				}
 			});
-			var blackListService = new BlackListService(blackListRepository);
+			var blackListService = new BlackListService(blackListRepository, _mapper);
 
-			await blackListService.UnblockUserAsync(initiator, blocked);
+			await blackListService.UnblockUserAsync(_mapper.Map<User, UserDto>(initiator), _mapper.Map<User, UserDto>(blocked));
 
 			Assert.True(!blackListRepository.Any(bl => bl.InitiatorId == initiator.Id && bl.BlockedId == blocked.Id));
 		}

@@ -8,25 +8,30 @@ using System.Threading.Tasks;
 using UseCases.Interfaces.Dtos;
 using DataAccess.Interfaces;
 using UseCases.Interfaces.Providers;
+using AutoMapper;
+using UseCases.Interfaces.Services;
 
 namespace UseCases.Implementation.Services
 {
-	public class MessageService
+	public class MessageService : IMessageService
 	{
 		private readonly IRepository<Message> _messageRepository;
 		private readonly IRepository<Attachment> _attachmentRepository;
 		private readonly ITimeProvider _timeProvider;
 		private readonly IAttachmentContentProvider _attachmentContentProvider;
+		private readonly Mapper _mapper;
 
-		public MessageService(IRepository<Message> messageRepository, IRepository<Attachment> attachmentRepository, ITimeProvider timeProvider, IAttachmentContentProvider attachmentContentProvider)
+		public MessageService(IRepository<Message> messageRepository, IRepository<Attachment> attachmentRepository, ITimeProvider timeProvider, IAttachmentContentProvider attachmentContentProvider,
+			Mapper mapper)
 		{
 			_messageRepository = messageRepository;
 			_attachmentRepository = attachmentRepository;
 			_timeProvider = timeProvider;
 			_attachmentContentProvider = attachmentContentProvider;
+			_mapper = mapper;
 		}
 
-		public async Task<MessageServiceResult> DeleteByIdsAsync(User actor, params long[] messageIds)
+		public async Task<MessageServiceResultDto> DeleteByIdsAsync(UserDto actor, params long[] messageIds)
 		{
 			await _messageRepository.DeleteByIdsAsync(messageIds);
 			var attachments = await GetMessagesAttachments(messageIds);
@@ -37,15 +42,18 @@ namespace UseCases.Implementation.Services
 			return methodResult;
 		}
 
-		public async Task<MessageServiceResult> SendMessageAsync(User sender, Conversation conversation, string messageText, Attachment[] attachments = null)
+		public async Task<MessageServiceResultDto> SendMessageAsync(UserDto sender, ConversationDto conversation, string messageText, AttachmentDto[] attachments = null)
 		{
+			var createdAttachments = new List<Attachment>();
 			if (attachments != null)
 			{
 				try
 				{
 					var attachmentLoadAsync = attachments.Select(a => _attachmentContentProvider.DidUpload(a) ? Task.CompletedTask : _attachmentContentProvider.WaitForContentLoading(a));
 					Task.WaitAll(attachmentLoadAsync.ToArray());
-					await _attachmentRepository.CreateManyAsync(attachments);
+					createdAttachments = (await _attachmentRepository.CreateManyAsync(
+						attachments.Select((a) => _mapper.Map<AttachmentDto, Attachment>(a))
+					)).ToList();
 				}
 				catch
 				{
@@ -55,9 +63,9 @@ namespace UseCases.Implementation.Services
 
 			var newMsg = await _messageRepository.CreateAsync(new Message
 			{
-				Sender = sender,
-				Conversation = conversation,
-				Attachments = attachments.ToList(),
+				Sender =_mapper.Map<UserDto, User>(sender),
+				Conversation = _mapper.Map<ConversationDto, Conversation>(conversation),
+				Attachments = createdAttachments,
 				CreatedAt = _timeProvider.NowUtc()
 			});
 
@@ -66,9 +74,10 @@ namespace UseCases.Implementation.Services
 			return methodResult;
 		}
 
-		public async Task<IEnumerable<Message>> GetMessagesByConversationId(long conversationId)
+		public async Task<IEnumerable<MessageDto>> GetMessagesByConversationId(long conversationId)
 		{
-			return await _messageRepository.AllAsync((m) => m.ConversationId == conversationId);
+			var messages = await _messageRepository.AllAsync((m) => m.ConversationId == conversationId);
+			return messages.Select(m => _mapper.Map<Message, MessageDto>(m));
 		}
 
 		private async Task<IEnumerable<Attachment>> GetMessagesAttachments(params long[] messageIds)
@@ -76,18 +85,18 @@ namespace UseCases.Implementation.Services
 			return await _attachmentRepository.AllAsync((a) => messageIds.Contains(a.MessageId));
 		}
 
-		private MessageServiceResult Ok(Message msg)
+		private MessageServiceResultDto Ok(Message msg)
 		{
-			return new MessageServiceResult
+			return new MessageServiceResultDto
 			{
-				Entity = msg,
+				Entity = _mapper.Map<Message, MessageDto>(msg),
 				Success = true
 			};
 		}
 
-		private MessageServiceResult Fail(MessageFailCauses failCause)
+		private MessageServiceResultDto Fail(MessageFailCauses failCause)
 		{
-			return new MessageServiceResult
+			return new MessageServiceResultDto
 			{
 				FailCause = failCause,
 				Success = false

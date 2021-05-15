@@ -4,28 +4,29 @@ using System.Collections.Generic;
 using System.IO;
 using System.Text;
 using System.Threading.Tasks;
+using UseCases.Interfaces.Dtos;
 using UseCases.Interfaces.Providers;
 
 namespace UseCases.Test
 {
 	class TestAttachmentContentProvider : IAttachmentContentProvider
 	{
-		public bool DidUpload(Attachment attachment)
+		public bool DidUpload(AttachmentDto attachment)
 		{
 			return true;
 		}
 
-		public Stream GetAttachmentContentStream(Attachment attachment)
+		public Stream GetAttachmentContentStream(AttachmentDto attachment)
 		{
 			return new MemoryStream();
 		}
 
-		public bool SaveAttachmentFiles(Attachment attachment, Stream attachmentFileStream)
+		public bool SaveAttachmentFiles(AttachmentDto attachment, Stream attachmentFileStream)
 		{
 			return true;
 		}
 
-		public Task WaitForContentLoading(Attachment attachment)
+		public Task WaitForContentLoading(AttachmentDto attachment)
 		{
 			return Task.CompletedTask;
 		}

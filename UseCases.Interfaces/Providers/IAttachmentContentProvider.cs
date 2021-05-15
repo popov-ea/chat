@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Text;
 using System.Threading.Tasks;
+using UseCases.Interfaces.Dtos;
 
 namespace UseCases.Interfaces.Providers
 {
@@ -12,10 +13,10 @@ namespace UseCases.Interfaces.Providers
 	/// </summary>
 	public interface IAttachmentContentProvider
 	{
-		public Stream GetAttachmentContentStream(Attachment attachment);
-		public bool SaveAttachmentFiles(Attachment attachment, Stream attachmentFileStream);
+		public Stream GetAttachmentContentStream(AttachmentDto attachment);
+		public bool SaveAttachmentFiles(AttachmentDto attachment, Stream attachmentFileStream);
 
-		public bool DidUpload(Attachment attachment);
-		public Task WaitForContentLoading(Attachment attachment);
+		public bool DidUpload(AttachmentDto attachment);
+		public Task WaitForContentLoading(AttachmentDto attachment);
 	}
 }

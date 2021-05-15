@@ -1,15 +1,18 @@
-﻿using Domain.Entities;
+﻿using AutoMapper;
+using Domain.Entities;
 using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
 using UseCases.Implementation.Services;
+using UseCases.Interfaces.Dtos;
 using Xunit;
 
 namespace UseCases.Test
 {
 	class MessageServiceTests
 	{
+		private readonly Mapper _mapper;
 		public async Task ShouldSendMessage()
 		{
 			var blackListRepository = new TestRepository<BlackList>();
@@ -17,7 +20,7 @@ namespace UseCases.Test
 			var attachmentRepository = new TestRepository<Attachment>();
 			var timeProvider = new TestTimeProvider();
 			var attachmentContentProvider = new TestAttachmentContentProvider();
-			var messageService = new MessageService(messageRepository, attachmentRepository, timeProvider, attachmentContentProvider);
+			var messageService = new MessageService(messageRepository, attachmentRepository, timeProvider, attachmentContentProvider, _mapper);
 			var sender = new User()
 			{
 				Id = 1
@@ -27,7 +30,8 @@ namespace UseCases.Test
 				Id = 1
 			};
 
-			await messageService.SendMessageAsync(sender, conversation, "test", new Attachment[] { new Attachment { Id = 1, MessageId = 1 } });
+			await messageService.SendMessageAsync(_mapper.Map<User, UserDto>(sender),
+				_mapper.Map<Conversation, ConversationDto>(conversation), "test", new AttachmentDto[] { new AttachmentDto { Id = 1, MessageId = 1 } });
 
 			var allAdded = messageRepository.Count == 1
 				&& attachmentRepository.Count == 1;
@@ -42,7 +46,7 @@ namespace UseCases.Test
 			var attachmentRepository = new TestRepository<Attachment>();
 			var timeProvider = new TestTimeProvider();
 			var attachmentContentProvider = new TestAttachmentContentProvider();
-			var messageService = new MessageService(messageRepository, attachmentRepository, timeProvider, attachmentContentProvider);
+			var messageService = new MessageService(messageRepository, attachmentRepository, timeProvider, attachmentContentProvider, _mapper);
 			var sender = new User()
 			{
 				Id = 1
@@ -52,8 +56,9 @@ namespace UseCases.Test
 				Id = 1
 			};
 
-			var result =  await messageService.SendMessageAsync(sender, conversation, "test", new Attachment[] { new Attachment { Id = 1, MessageId = 1 } });
-			await messageService.DeleteByIdsAsync(sender, result.Entity.Id);
+			var result =  await messageService.SendMessageAsync(_mapper.Map<User, UserDto>(sender),
+				_mapper.Map<Conversation, ConversationDto>(conversation), "test", new AttachmentDto[] { new AttachmentDto { Id = 1, MessageId = 1 } });
+			await messageService.DeleteByIdsAsync(_mapper.Map<User, UserDto>(sender), result.Entity.Id);
 
 			var allDeleted = messageRepository.Count == 0
 				&& attachmentRepository.Count == 0;
@@ -70,7 +75,7 @@ namespace UseCases.Test
 			var attachmentRepository = new TestRepository<Attachment>();
 			var timeProvider = new TestTimeProvider();
 			var attachmentContentProvider = new TestAttachmentContentProvider();
-			var messageService = new MessageService(messageRepository, attachmentRepository, timeProvider, attachmentContentProvider);
+			var messageService = new MessageService(messageRepository, attachmentRepository, timeProvider, attachmentContentProvider, _mapper);
 			var sender = new User()
 			{
 				Id = senderId
@@ -93,7 +98,8 @@ namespace UseCases.Test
 				}
 			};
 
-			await messageService.SendMessageAsync(sender, conversation, "test", new Attachment[] { new Attachment { Id = 1, MessageId = 1 } });
+			await messageService.SendMessageAsync(_mapper.Map<User, UserDto>(sender),
+				_mapper.Map<Conversation, ConversationDto>(conversation), "test", new AttachmentDto[] { new AttachmentDto { Id = 1, MessageId = 1 } });
 
 			var notSent = messageRepository.Count == 0
 				&& attachmentRepository.Count == 0;

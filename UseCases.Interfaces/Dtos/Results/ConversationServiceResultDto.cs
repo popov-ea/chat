@@ -6,7 +6,7 @@ using System.Text;
 
 namespace UseCases.Interfaces.Dtos
 {
-	public class ConversationServiceResult : EntityManipulationResult<Conversation, ConversationFailCause>
+	public class ConversationServiceResultDto : EntityManipulationResultDto<ConversationDto, ConversationFailCause>
 	{
 	}
 }

@@ -1,4 +1,5 @@
-﻿using Domain.Entities;
+﻿using AutoMapper;
+using Domain.Entities;
 using Domain.Enums;
 using System;
 using System.Collections.Generic;
@@ -6,6 +7,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using UseCases.Implementation.Services;
+using UseCases.Implementations;
+using UseCases.Interfaces.Dtos;
 using Xunit;
 
 namespace UseCases.Test
@@ -14,6 +17,7 @@ namespace UseCases.Test
 	{
 		private readonly TestTimeProvider _timeProvider = new TestTimeProvider();
 		private readonly TestAttachmentContentProvider _attachmentContentProvider = new TestAttachmentContentProvider();
+		private readonly Mapper _mapper = MapperHelpers.GetConfiguredMapper();
 
 		[Fact]
 		public async Task ShouldCreateConversationCorrectly()
@@ -24,9 +28,9 @@ namespace UseCases.Test
 			var chatActionRepository = new TestRepository<ChatAction>();
 			var messageRepository = new TestRepository<Message>();
 			var attachmentRepository = new TestRepository<Attachment>();
-			var messageService = new MessageService(messageRepository, attachmentRepository, _timeProvider, _attachmentContentProvider);
-			var blackListService = new BlackListService(blackListRepository);
-			var conversationService = new ConversationService(conversationRepository, conversationUserRepository, chatActionRepository, blackListService, messageService, _timeProvider);
+			var messageService = new MessageService(messageRepository, attachmentRepository, _timeProvider, _attachmentContentProvider, _mapper);
+			var blackListService = new BlackListService(blackListRepository, _mapper);
+			var conversationService = new ConversationService(conversationRepository, conversationUserRepository, chatActionRepository, blackListService, messageService, _timeProvider, _mapper);
 			var initiator = new User { Id = 1, Username = "name 1" };
 			var invited = new List<User>
 			{
@@ -42,7 +46,7 @@ namespace UseCases.Test
 				}
 			};
 
-			var response = await conversationService.CreateConversationAsync(initiator, invited);
+			var response = await conversationService.CreateConversationAsync(_mapper.Map<User, UserDto>(initiator), invited.Select(u => _mapper.Map<User, UserDto>(u)));
 			var conversationCreated = conversationRepository.AnyAsync(c => c.Id == response.Entity.Id);
 			var chatActionCreated = chatActionRepository.AnyAsync(c => c.Type == ChatActionType.NewChat && c.ConversationId == response.Entity.Id);
 			var conversationUsersCreated = invited.Union(new User[] { initiator })
@@ -101,8 +105,8 @@ namespace UseCases.Test
 				}
 			});
 
-			var blackListService = new BlackListService(blackListRepository);
-			var messageService = new MessageService(messageRepository, attachmentRepository, _timeProvider, _attachmentContentProvider);
+			var blackListService = new BlackListService(blackListRepository, _mapper);
+			var messageService = new MessageService(messageRepository, attachmentRepository, _timeProvider, _attachmentContentProvider, _mapper);
 
 			var conversation = new Conversation
 			{
@@ -114,9 +118,9 @@ namespace UseCases.Test
 			{
 				conversation
 			});
-			var conversationService = new ConversationService(conversationRepository, conversationUserRepository, chatActionRepository, blackListService, messageService, _timeProvider);
+			var conversationService = new ConversationService(conversationRepository, conversationUserRepository, chatActionRepository, blackListService, messageService, _timeProvider, _mapper);
 
-			await conversationService.DeleteConversationAsync(initiator, conversation);
+			await conversationService.DeleteConversationAsync(_mapper.Map<User, UserDto>(initiator), _mapper.Map<Conversation, ConversationDto>(conversation));
 
 			var allHistoryCleared = conversationRepository.Count == 0
 				&& messageRepository.Count == 0

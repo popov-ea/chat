@@ -10,6 +10,7 @@ namespace Domain.Entities
 		public string Username { get; set; }
 
 		public List<ConversationUser> Conversations { get; set; }
+		public List<BlackList> BlackLists { get; set; }
 
 		public DateTime CreatedAt { get; set; }
 		public DateTime DeletedAt { get; set; }
