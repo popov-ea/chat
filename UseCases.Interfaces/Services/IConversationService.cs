@@ -8,8 +8,11 @@ namespace UseCases.Interfaces.Services
 {
 	public interface IConversationService
 	{
-		public Task<ConversationServiceResultDto> CreateConversationAsync(UserDto initiator, IEnumerable<UserDto> invitedUsers, string name = null);
-		public Task<ConversationServiceResultDto> DeleteConversationAsync(UserDto actor, ConversationDto conversation);
-		public Task<ConversationServiceResultDto> ClearConversationAsync(UserDto actor, ConversationDto conversation);
+		public Task<ConversationServiceResultDto> CreateConversationAsync(long initiatorId, IEnumerable<long> invitedUserIds, string name = null);
+		public Task<ConversationServiceResultDto> DeleteConversationAsync(long actorId, long conversationId);
+		public Task<ConversationServiceResultDto> ClearConversationAsync(long actorId, long conversationID);
+		public Task<ConversationDto> GetConversationAsync(long conversationId);
+		public Task<IEnumerable<ConversationDto>> GetAllConversationsAsync();
+		public Task<ConversationServiceResultDto> UpdateConversationAsync(long conversationId, ConversationDto newData);
 	}
 }

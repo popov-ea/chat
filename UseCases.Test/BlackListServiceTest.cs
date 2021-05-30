@@ -37,7 +37,7 @@ namespace UseCases.Test
 			});
 			var blackListService = new BlackListService(blackListRepository, _mapper);
 
-			await blackListService.BlockUserAsync(_mapper.Map<User, UserDto>(initiator), _mapper.Map<User, UserDto>(blocked));
+			await blackListService.BlockUserAsync(initiator.Id, blocked.Id);
 
 			Assert.True(blackListRepository.Any(bl => bl.InitiatorId == initiator.Id && bl.BlockedId == blocked.Id));
 		}
@@ -71,7 +71,7 @@ namespace UseCases.Test
 			});
 			var blackListService = new BlackListService(blackListRepository, _mapper);
 
-			await blackListService.UnblockUserAsync(_mapper.Map<User, UserDto>(initiator), _mapper.Map<User, UserDto>(blocked));
+			await blackListService.UnblockUserAsync(initiator.Id, blocked.Id);
 
 			Assert.True(!blackListRepository.Any(bl => bl.InitiatorId == initiator.Id && bl.BlockedId == blocked.Id));
 		}

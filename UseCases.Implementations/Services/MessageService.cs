@@ -21,8 +21,8 @@ namespace UseCases.Implementation.Services
 		private readonly IAttachmentContentProvider _attachmentContentProvider;
 		private readonly Mapper _mapper;
 
-		public MessageService(IRepository<Message> messageRepository, IRepository<Attachment> attachmentRepository, ITimeProvider timeProvider, IAttachmentContentProvider attachmentContentProvider,
-			Mapper mapper)
+		public MessageService(IRepository<Message> messageRepository, IRepository<Attachment> attachmentRepository, ITimeProvider timeProvider,  
+			IAttachmentContentProvider attachmentContentProvider, Mapper mapper)
 		{
 			_messageRepository = messageRepository;
 			_attachmentRepository = attachmentRepository;
@@ -31,7 +31,7 @@ namespace UseCases.Implementation.Services
 			_mapper = mapper;
 		}
 
-		public async Task<MessageServiceResultDto> DeleteByIdsAsync(UserDto actor, params long[] messageIds)
+		public async Task<MessageServiceResultDto> DeleteByIdsAsync(long actorId, params long[] messageIds)
 		{
 			await _messageRepository.DeleteByIdsAsync(messageIds);
 			var attachments = await GetMessagesAttachments(messageIds);
@@ -42,7 +42,7 @@ namespace UseCases.Implementation.Services
 			return methodResult;
 		}
 
-		public async Task<MessageServiceResultDto> SendMessageAsync(UserDto sender, ConversationDto conversation, string messageText, AttachmentDto[] attachments = null)
+		public async Task<MessageServiceResultDto> SendMessageAsync(long senderId, long conversationId, string messageText, AttachmentDto[] attachments = null)
 		{
 			var createdAttachments = new List<Attachment>();
 			if (attachments != null)
@@ -63,8 +63,8 @@ namespace UseCases.Implementation.Services
 
 			var newMsg = await _messageRepository.CreateAsync(new Message
 			{
-				Sender =_mapper.Map<UserDto, User>(sender),
-				Conversation = _mapper.Map<ConversationDto, Conversation>(conversation),
+				SenderId = senderId,
+				ConversationId = conversationId,
 				Attachments = createdAttachments,
 				CreatedAt = _timeProvider.NowUtc()
 			});

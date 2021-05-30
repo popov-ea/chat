@@ -9,13 +9,15 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{08D0AE05
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "UseCases.Test", "UseCases.Test\UseCases.Test.csproj", "{6D9303AF-79C2-452E-A85E-2CFBA7BAA279}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DataAccess.EFCore", "DataAccess\DataAccess.EFCore.csproj", "{4EE172BB-64AE-4010-A45F-5E5678AD973F}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DataAccess.EFCore", "DataAccess\DataAccess.EFCore.csproj", "{4EE172BB-64AE-4010-A45F-5E5678AD973F}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DataAccess.Interfaces", "DataAccess.Interfaces\DataAccess.Interfaces.csproj", "{615CAFD5-7FC4-4BF1-ACEF-6ABF674B9E14}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DataAccess.Interfaces", "DataAccess.Interfaces\DataAccess.Interfaces.csproj", "{615CAFD5-7FC4-4BF1-ACEF-6ABF674B9E14}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UseCases.Interfaces", "UseCases.Interfaces\UseCases.Interfaces.csproj", "{D39EB31A-5C56-4807-B620-970B2C881FB7}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "UseCases.Interfaces", "UseCases.Interfaces\UseCases.Interfaces.csproj", "{D39EB31A-5C56-4807-B620-970B2C881FB7}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UseCases.Implementations", "UseCases.Implementations\UseCases.Implementations.csproj", "{70C77E7A-4F72-4E86-BA65-E4BA27371EE4}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "UseCases.Implementations", "UseCases.Implementations\UseCases.Implementations.csproj", "{70C77E7A-4F72-4E86-BA65-E4BA27371EE4}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Server", "Server\Server.csproj", "{D38CB7B6-BED0-4EC8-88AA-00231C924C65}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -99,6 +101,18 @@ Global
 		{70C77E7A-4F72-4E86-BA65-E4BA27371EE4}.Release|x64.Build.0 = Release|Any CPU
 		{70C77E7A-4F72-4E86-BA65-E4BA27371EE4}.Release|x86.ActiveCfg = Release|Any CPU
 		{70C77E7A-4F72-4E86-BA65-E4BA27371EE4}.Release|x86.Build.0 = Release|Any CPU
+		{D38CB7B6-BED0-4EC8-88AA-00231C924C65}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D38CB7B6-BED0-4EC8-88AA-00231C924C65}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D38CB7B6-BED0-4EC8-88AA-00231C924C65}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{D38CB7B6-BED0-4EC8-88AA-00231C924C65}.Debug|x64.Build.0 = Debug|Any CPU
+		{D38CB7B6-BED0-4EC8-88AA-00231C924C65}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{D38CB7B6-BED0-4EC8-88AA-00231C924C65}.Debug|x86.Build.0 = Debug|Any CPU
+		{D38CB7B6-BED0-4EC8-88AA-00231C924C65}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D38CB7B6-BED0-4EC8-88AA-00231C924C65}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D38CB7B6-BED0-4EC8-88AA-00231C924C65}.Release|x64.ActiveCfg = Release|Any CPU
+		{D38CB7B6-BED0-4EC8-88AA-00231C924C65}.Release|x64.Build.0 = Release|Any CPU
+		{D38CB7B6-BED0-4EC8-88AA-00231C924C65}.Release|x86.ActiveCfg = Release|Any CPU
+		{D38CB7B6-BED0-4EC8-88AA-00231C924C65}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

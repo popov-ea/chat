@@ -20,8 +20,8 @@ namespace UseCases.Implementation.Services
 		private readonly IRepository<ChatAction> _chatActionRepository;
 		private readonly IRepository<ConversationUser> _conversationUserRepository;
 		private readonly ITimeProvider _timeProvider;
-		private readonly MessageService _messageService;
-		private readonly BlackListService _blackListService;
+		private readonly IMessageService _messageService;
+		private readonly IBlackListService _blackListService;
 		private readonly Mapper _mapper;
 
 		// :/
@@ -37,79 +37,48 @@ namespace UseCases.Implementation.Services
 			_mapper = mapper;
 		}
 
-		public async Task<ConversationServiceResultDto> CreateConversationAsync(UserDto initiator, IEnumerable<UserDto> invitedUsers, string name = null)
+		public async Task<ConversationServiceResultDto> CreateConversationAsync(long initiatorId, IEnumerable<long> invitedUserIds, string name = null)
 		{
-			var allUsers = invitedUsers.Union(new[] { initiator });
+			var allUserIds = invitedUserIds.Union(new[] { initiatorId });
 
-			if (invitedUsers.Count() == 0)
+			if (invitedUserIds.Count() == 0)
 			{
 				return Fail(ConversationFailCause.NoUsersInvited);
 			}
 
-			if (await DidAnyoneBlock(invitedUsers, initiator))
+			if (await DidAnyoneBlock(invitedUserIds, initiatorId))
 			{
 				return Fail(ConversationFailCause.BlockedUser);
 			}
 
-			if (name == null)
-			{
-				name = GenerateConversationName(allUsers);
-			}
-
 			var conversation = await _conversationRepository.CreateAsync(
-				new Conversation { Name = name, Owner = _mapper.Map<UserDto,User>(initiator), OwnerId = initiator.Id }
+				new Conversation { Name = name, OwnerId = initiatorId }
 			);
 
 			await _conversationUserRepository.CreateManyAsync(
-				allUsers.Select(u => new ConversationUser { Conversation = conversation, User = _mapper.Map<UserDto, User>(u), UserId = u.Id })
+				allUserIds.Select(u => new ConversationUser { Conversation = conversation, UserId = u })
 			);
-			await _chatActionRepository.CreateAsync(new ChatAction { InitiatorId = initiator.Id, CreatedAt = _timeProvider.NowUtc(), Type = ChatActionType.NewChat });
+			await _chatActionRepository.CreateAsync(new ChatAction { InitiatorId = initiatorId, CreatedAt = _timeProvider.NowUtc(), Type = ChatActionType.NewChat });
 
 			var methodResult = Ok(conversation);
 
 			return methodResult;
 		}
 
-		public async Task<ConversationServiceResultDto> DeleteConversationAsync(UserDto actor, ConversationDto conversation)
+		public async Task<ConversationServiceResultDto> ClearConversationAsync(long actorId, long conversationId)
 		{
-			if (!IsOwner(conversation, actor))
+			if (!await IsOwner(conversationId, actorId))
 			{
 				return Fail(ConversationFailCause.NoPermissions);
 			}
-			
-			ClearConversationAsync(actor, conversation);
 
-			var conversationUsers = _conversationUserRepository.AllAsync(cu => cu.ConversationId == conversation.Id);
-			var chatActionsAsync =  _chatActionRepository.AllAsync(a => a.ConversationId == conversation.Id);
-			var chatMessages = _messageService.GetMessagesByConversationId(conversation.Id);
+			var chatActionsAsync = _chatActionRepository.AllAsync(a => a.ConversationId == conversationId);
+			var chatMessages = _messageService.GetMessagesByConversationId(conversationId);
 
-			await _conversationUserRepository.DeleteByIdsAsync((await conversationUsers).Select(c => c.Id).ToArray());
 			await _chatActionRepository.DeleteByIdsAsync((await chatActionsAsync).Select(a => a.Id).ToArray());
-			await _messageService.DeleteByIdsAsync(actor, (await chatMessages).Select(a => a.Id).ToArray());
+			await _messageService.DeleteByIdsAsync(actorId, (await chatMessages).Select(a => a.Id).ToArray());
 
-			var deleted = await _conversationRepository.DeleteByIdsAsync(conversation.Id);
-
-			var methodResult = Ok(deleted.FirstOrDefault());
-
-			return methodResult;
-		}
-
-		public async Task<ConversationServiceResultDto> ClearConversationAsync(UserDto actor, ConversationDto conversation)
-		{
-			if (!IsOwner(conversation, actor))
-			{
-				return Fail(ConversationFailCause.NoPermissions);
-			}
-			await _messageService.DeleteByIdsAsync(actor, conversation.Messages.Select(m => m.Id).ToArray());
-
-			var methodResult = Ok(await _conversationRepository.FindAsync(conversation.Id));
-
-			return Ok(await _conversationRepository.FindAsync(conversation.Id));
-		}
-
-		private string GenerateConversationName(IEnumerable<UserDto> users)
-		{
-			return string.Concat(users.Select(u => u.Username ?? ""), " ");
+			return Ok(await _conversationRepository.FindAsync(conversationId));
 		}
 
 		private ConversationServiceResultDto Fail(ConversationFailCause failCause)
@@ -126,18 +95,61 @@ namespace UseCases.Implementation.Services
 			return new ConversationServiceResultDto
 			{
 				Success = true,
-				Entity = _mapper.Map<Conversation, ConversationDto>(conversation)
+				Entity = MapToDto(conversation)
 			};
 		}
 
-		private async Task<bool> DidAnyoneBlock(IEnumerable<UserDto> users, UserDto maybeBlocked)
+		private async Task<bool> DidAnyoneBlock(IEnumerable<long> userIds, long maybeBlockedId)
 		{
-			return await _blackListService.CheckAnyBlocked(maybeBlocked, users);
+			return await _blackListService.CheckAnyBlocked(maybeBlockedId, userIds);
 		}
 
-		private bool IsOwner(ConversationDto conversation, UserDto maybeOwner)
+		private async Task<bool> IsOwner(long conversationId, long maybeOwnerId)
 		{
-			return conversation.OwnerId == maybeOwner.Id;
+			var conversation = await _conversationRepository.FindAsync(conversationId);
+			return conversation.OwnerId == maybeOwnerId;
+		}
+
+		public async Task<IEnumerable<ConversationDto>> GetAllConversationsAsync()
+		{
+			var allConversations = await _conversationRepository.AllAsync();
+			return allConversations.Select((c) => MapToDto(c));
+		}
+
+		private ConversationDto MapToDto(Conversation conversation)
+		{
+			return _mapper.Map<Conversation, ConversationDto>(conversation);
+		}
+
+		public async Task<ConversationDto> GetConversationAsync(long conversationId)
+		{
+			var conversation = await _conversationRepository.FindAsync(conversationId);
+			return MapToDto(conversation);
+		}
+
+		public async Task<ConversationServiceResultDto> UpdateConversationAsync(long conversationId, ConversationDto newData)
+		{
+			var conversation = await _conversationRepository.FindAsync(conversationId);
+			conversation.Name = newData.Name;
+			var updated = await _conversationRepository.UpdateAsync(conversation);
+			return Ok(updated);
+		}
+
+		public async Task<ConversationServiceResultDto> DeleteConversationAsync(long actorId, long conversationId)
+		{
+			if (!await IsOwner(conversationId, actorId))
+			{
+				return Fail(ConversationFailCause.NoPermissions);
+			}
+
+			ClearConversationAsync(actorId, conversationId);
+
+			var conversationUsers = _conversationUserRepository.AllAsync(cu => cu.ConversationId == conversationId);
+			await _conversationUserRepository.DeleteByIdsAsync((await conversationUsers).Select(c => c.Id).ToArray());
+
+			var deleted = await _conversationRepository.DeleteByIdsAsync(conversationId);
+
+			return Ok(deleted.FirstOrDefault());
 		}
 	}
 }

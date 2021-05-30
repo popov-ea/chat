@@ -46,7 +46,7 @@ namespace UseCases.Test
 				}
 			};
 
-			var response = await conversationService.CreateConversationAsync(_mapper.Map<User, UserDto>(initiator), invited.Select(u => _mapper.Map<User, UserDto>(u)));
+			var response = await conversationService.CreateConversationAsync(initiator.Id, invited.Select(u => u.Id));
 			var conversationCreated = conversationRepository.AnyAsync(c => c.Id == response.Entity.Id);
 			var chatActionCreated = chatActionRepository.AnyAsync(c => c.Type == ChatActionType.NewChat && c.ConversationId == response.Entity.Id);
 			var conversationUsersCreated = invited.Union(new User[] { initiator })
@@ -120,7 +120,7 @@ namespace UseCases.Test
 			});
 			var conversationService = new ConversationService(conversationRepository, conversationUserRepository, chatActionRepository, blackListService, messageService, _timeProvider, _mapper);
 
-			await conversationService.DeleteConversationAsync(_mapper.Map<User, UserDto>(initiator), _mapper.Map<Conversation, ConversationDto>(conversation));
+			await conversationService.DeleteConversationAsync(initiator.Id, conversation.Id);
 
 			var allHistoryCleared = conversationRepository.Count == 0
 				&& messageRepository.Count == 0

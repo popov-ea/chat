@@ -8,9 +8,9 @@ namespace UseCases.Interfaces.Services
 {
 	public interface IBlackListService
 	{
-		public Task<BlackListResultDto> BlockUserAsync(UserDto initiator, UserDto toBlock);
-		public Task<BlackListResultDto> UnblockUserAsync(UserDto initiator, UserDto blocked);
-		public Task<bool> CheckExistsAsync(UserDto initiator, UserDto blocked);
-		public Task<bool> CheckAnyBlocked(UserDto mightBeBlocked, IEnumerable<UserDto> mightBlock);
+		public Task<BlackListResultDto> BlockUserAsync(long initiatorId, long toBlockId);
+		public Task<BlackListResultDto> UnblockUserAsync(long initiatorId, long blockedId);
+		public Task<bool> CheckExistsAsync(long initiatorId, long blockedId);
+		public Task<bool> CheckAnyBlocked(long mightBeBlockedId, IEnumerable<long> mightBlockId);
 	}
 }

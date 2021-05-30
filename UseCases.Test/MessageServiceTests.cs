@@ -30,8 +30,7 @@ namespace UseCases.Test
 				Id = 1
 			};
 
-			await messageService.SendMessageAsync(_mapper.Map<User, UserDto>(sender),
-				_mapper.Map<Conversation, ConversationDto>(conversation), "test", new AttachmentDto[] { new AttachmentDto { Id = 1, MessageId = 1 } });
+			await messageService.SendMessageAsync(sender.Id, conversation.Id, "test", new AttachmentDto[] { new AttachmentDto { Id = 1, MessageId = 1 } });
 
 			var allAdded = messageRepository.Count == 1
 				&& attachmentRepository.Count == 1;
@@ -43,6 +42,8 @@ namespace UseCases.Test
 		{
 			var blackListRepository = new TestRepository<BlackList>();
 			var messageRepository = new TestRepository<Message>();
+			var conversationRepository = new TestRepository<Conversation>();
+			var conversationUserRepository = new TestRepository<ConversationUser>();
 			var attachmentRepository = new TestRepository<Attachment>();
 			var timeProvider = new TestTimeProvider();
 			var attachmentContentProvider = new TestAttachmentContentProvider();
@@ -56,9 +57,9 @@ namespace UseCases.Test
 				Id = 1
 			};
 
-			var result =  await messageService.SendMessageAsync(_mapper.Map<User, UserDto>(sender),
-				_mapper.Map<Conversation, ConversationDto>(conversation), "test", new AttachmentDto[] { new AttachmentDto { Id = 1, MessageId = 1 } });
-			await messageService.DeleteByIdsAsync(_mapper.Map<User, UserDto>(sender), result.Entity.Id);
+			var result =  await messageService.SendMessageAsync(sender.Id,
+				conversation.Id, "test", new AttachmentDto[] { new AttachmentDto { Id = 1, MessageId = 1 } });
+			await messageService.DeleteByIdsAsync(sender.Id, result.Entity.Id);
 
 			var allDeleted = messageRepository.Count == 0
 				&& attachmentRepository.Count == 0;
@@ -98,8 +99,7 @@ namespace UseCases.Test
 				}
 			};
 
-			await messageService.SendMessageAsync(_mapper.Map<User, UserDto>(sender),
-				_mapper.Map<Conversation, ConversationDto>(conversation), "test", new AttachmentDto[] { new AttachmentDto { Id = 1, MessageId = 1 } });
+			await messageService.SendMessageAsync(sender.Id, conversation.Id, "test", new AttachmentDto[] { new AttachmentDto { Id = 1, MessageId = 1 } });
 
 			var notSent = messageRepository.Count == 0
 				&& attachmentRepository.Count == 0;

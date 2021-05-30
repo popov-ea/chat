@@ -23,9 +23,9 @@ namespace UseCases.Implementation.Services
 			_mapper = mapper;
 		}
 
-		public async Task<BlackListResultDto> BlockUserAsync(UserDto initiator, UserDto toBlock)
+		public async Task<BlackListResultDto> BlockUserAsync(long initiatorId, long toBlockId)
 		{
-			bool alreadyBlocked = await CheckExistsAsync(initiator, toBlock);
+			bool alreadyBlocked = await CheckExistsAsync(initiatorId, toBlockId);
 			if (alreadyBlocked)
 			{
 				return Fail(BlackListFailCauses.AlreadyBlocked);
@@ -33,18 +33,16 @@ namespace UseCases.Implementation.Services
 
 			var created = _blackListRepository.Create(new BlackList
 			{
-				Initiator = _mapper.Map<UserDto, User>(initiator),
-				Blocked =  _mapper.Map<UserDto, User>(toBlock),
-				InitiatorId = initiator.Id,
-				BlockedId = toBlock.Id
+				InitiatorId = initiatorId,
+				BlockedId = toBlockId
 			});
 
 			return Ok(created);
 		}
 
-		public async Task<BlackListResultDto> UnblockUserAsync(UserDto initiator, UserDto blocked)
+		public async Task<BlackListResultDto> UnblockUserAsync(long initiatorId, long blockedId)
 		{
-			var blackListItem = await _blackListRepository.FirstOrDefaultAsync(bl => bl.Initiator.Id == initiator.Id && bl.BlockedId == blocked.Id);
+			var blackListItem = await _blackListRepository.FirstOrDefaultAsync(bl => bl.Initiator.Id == initiatorId && bl.BlockedId == blockedId);
 			if (blackListItem == null)
 			{
 				return Fail(BlackListFailCauses.NotBlocked);
@@ -53,16 +51,15 @@ namespace UseCases.Implementation.Services
 			return Ok(deleted);
 		}
 
-		public async Task<bool> CheckExistsAsync(UserDto initiator, UserDto blocked)
+		public async Task<bool> CheckExistsAsync(long initiatorId, long blockedId)
 		{
-			var found = await _blackListRepository.FirstOrDefaultAsync(bl => bl.Initiator.Id == initiator.Id && bl.BlockedId == blocked.Id);
+			var found = await _blackListRepository.FirstOrDefaultAsync(bl => bl.Initiator.Id == initiatorId && bl.BlockedId == blockedId);
 			return found != null;
 		}
 
-		public async Task<bool> CheckAnyBlocked(UserDto mightBeBlocked, IEnumerable<UserDto> mightBlock)
+		public async Task<bool> CheckAnyBlocked(long mightBeBlockedId, IEnumerable<long> mightBlockIds)
 		{
-			var mightBlockIds = mightBlock.Select((u) => u.Id);
-			return await _blackListRepository.AnyAsync((bl) => bl.BlockedId == mightBeBlocked.Id && mightBlockIds.Contains(bl.InitiatorId));
+			return await _blackListRepository.AnyAsync((bl) => bl.BlockedId == mightBeBlockedId && mightBlockIds.Contains(bl.InitiatorId));
 		}
 
 		private BlackListResultDto Fail(BlackListFailCauses failCause)

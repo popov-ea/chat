@@ -8,8 +8,8 @@ namespace UseCases.Interfaces.Services
 {
 	public interface IMessageService
 	{
-		public Task<MessageServiceResultDto> DeleteByIdsAsync(UserDto actor, params long[] messageIds);
-		public Task<MessageServiceResultDto> SendMessageAsync(UserDto sender, ConversationDto conversation, string messageText, AttachmentDto[] attachments = null);
+		public Task<MessageServiceResultDto> DeleteByIdsAsync(long actorId, params long[] messageIds);
+		public Task<MessageServiceResultDto> SendMessageAsync(long senderId, long conversationId, string messageText, AttachmentDto[] attachments = null);
 		public Task<IEnumerable<MessageDto>> GetMessagesByConversationId(long conversationId);
 	}
 }

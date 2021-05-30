@@ -17,6 +17,6 @@ namespace Domain.Enums
 		/// <summary>
 		/// User has no permissions for action
 		/// </summary>
-		NoPermissions,
+		NoPermissions
 	}
 }
