@@ -8,18 +8,18 @@ using System.Text;
 using System.Threading.Tasks;
 using DataAccess.Interfaces;
 
-namespace DataAccess
+namespace DataAccess.EFCore
 {
-	class EFCoreRepository<T> : IRepository<T> 
+	public class EFCoreRepository<T> : IRepository<T> 
 		where T : class, IEntity
-	{	
-		private readonly string _connectionString;
+	{
+		private readonly DbConfig _dbConfig;
 
 		public long Count => throw new NotImplementedException();
 
-		public EFCoreRepository(string connectionString)
+		public EFCoreRepository(DbConfig dbConfig)
 		{
-			_connectionString = connectionString;
+			_dbConfig = dbConfig;
 		}
 
 		public IEnumerable<T> All(Func<T, bool> predicate)
@@ -190,6 +190,6 @@ namespace DataAccess
 			return entity;
 		}
 
-		private ChatDb GetChatDb() => new ChatDb(_connectionString);
+		private ChatDb GetChatDb() => new ChatDb(_dbConfig);
 	}
 }

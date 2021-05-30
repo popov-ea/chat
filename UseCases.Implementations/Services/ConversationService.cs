@@ -7,12 +7,12 @@ using System.Text;
 using System.Threading.Tasks;
 using DataAccess.Interfaces;
 using UseCases.Interfaces.Providers;
-using UseCases.Implementation.Services;
+using UseCases.Implementations.Services;
 using UseCases.Interfaces.Dtos;
 using AutoMapper;
 using UseCases.Interfaces.Services;
 
-namespace UseCases.Implementation.Services
+namespace UseCases.Implementations.Services
 {
 	public class ConversationService : IConversationService
 	{
@@ -26,7 +26,7 @@ namespace UseCases.Implementation.Services
 
 		// :/
 		public ConversationService(IRepository<Conversation> conversationRepository, IRepository<ConversationUser> conversationUserRepository,
-			IRepository<ChatAction> chatActionRepository, BlackListService blackListService, MessageService messageService, ITimeProvider timeProvider, Mapper mapper)
+			IRepository<ChatAction> chatActionRepository, IBlackListService blackListService, IMessageService messageService, ITimeProvider timeProvider, Mapper mapper)
 		{
 			_conversationRepository = conversationRepository;
 			_chatActionRepository = chatActionRepository;

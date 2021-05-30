@@ -4,7 +4,7 @@ using Domain.Entities;
 using System.Threading.Tasks;
 using System.Collections.Generic;
 using System.Linq;
-using UseCases.Implementation.Services;
+using UseCases.Implementations.Services;
 using AutoMapper;
 using UseCases.Implementations;
 using UseCases.Interfaces.Dtos;

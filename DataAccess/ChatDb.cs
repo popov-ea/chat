@@ -1,7 +1,7 @@
 ﻿using Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 
-namespace DataAccess
+namespace DataAccess.EFCore
 {
 	internal class ChatDb : DbContext
 	{
@@ -15,9 +15,9 @@ namespace DataAccess
 		public DbSet<Message> Messages { get; set; }
 		public DbSet<User> Users { get; set; }
 
-		public ChatDb(string connectionString)
+		public ChatDb(DbConfig dbConfig)
 		{
-			_connectionString = connectionString;
+			_connectionString = dbConfig.ConnectionString;
 		}
 
 		protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)

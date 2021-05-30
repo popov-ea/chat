@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 using AutoMapper;
 using UseCases.Interfaces.Services;
 
-namespace UseCases.Implementation.Services
+namespace UseCases.Implementations.Services
 {
 	public class BlackListService : IBlackListService
 	{

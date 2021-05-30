@@ -6,7 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using UseCases.Implementation.Services;
+using UseCases.Implementations.Services;
 using UseCases.Implementations;
 using UseCases.Interfaces.Dtos;
 using Xunit;

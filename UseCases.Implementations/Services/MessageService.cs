@@ -11,7 +11,7 @@ using UseCases.Interfaces.Providers;
 using AutoMapper;
 using UseCases.Interfaces.Services;
 
-namespace UseCases.Implementation.Services
+namespace UseCases.Implementations.Services
 {
 	public class MessageService : IMessageService
 	{

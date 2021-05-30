@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 using UseCases.Interfaces.Dtos;
 using UseCases.Interfaces.Services;
 
-namespace UseCases.Implementation.Services
+namespace UseCases.Implementations.Services
 {
 	public class UserService : IUserService
 	{

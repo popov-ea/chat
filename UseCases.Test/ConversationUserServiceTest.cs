@@ -4,8 +4,8 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
-using UseCases.Implementations;
 using UseCases.Implementations.Services;
+using UseCases.Implementations;
 using Xunit;
 
 namespace UseCases.Test
