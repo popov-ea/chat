@@ -10,5 +10,6 @@ namespace UseCases.Interfaces.Services
 	{
 		public Task<UserDto> GetUserAsync(long userId);
 		public Task<IEnumerable<UserDto>> GetUsersAsync(IEnumerable<long> userIds);
+		public Task<UserDto> CreateUserAsync(UserDto userDto);
 	}
 }

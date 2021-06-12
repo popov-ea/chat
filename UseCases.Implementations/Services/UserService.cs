@@ -22,6 +22,12 @@ namespace UseCases.Implementations.Services
 			_mapper = mapper;
 		}
 
+		public async Task<UserDto> CreateUserAsync(UserDto userDto)
+		{
+			var user = await _userRepository.CreateAsync(MapToEntity(userDto));
+			return MapToDto(user);
+		}
+
 		public async Task<UserDto> GetUserAsync(long userId)
 		{
 			var user = await _userRepository.FindAsync(userId);
@@ -37,6 +43,11 @@ namespace UseCases.Implementations.Services
 		private UserDto MapToDto(User user)
 		{
 			return _mapper.Map<User, UserDto>(user);
+		}
+
+		private User MapToEntity(UserDto userDto)
+		{
+			return _mapper.Map<UserDto, User>(userDto);
 		}
 	}
 }

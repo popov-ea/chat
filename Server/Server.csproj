@@ -11,6 +11,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\Auth.Interfaces\Auth.Interfaces.csproj" />
     <ProjectReference Include="..\UseCases.Interfaces\UseCases.Interfaces.csproj" />
   </ItemGroup>
 
