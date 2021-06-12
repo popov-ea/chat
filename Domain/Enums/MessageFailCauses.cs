@@ -9,6 +9,10 @@ namespace Domain.Enums
 		/// <summary>
 		/// error while working with attachments
 		/// </summary>
-		AttachmentSaveFailed
+		AttachmentSaveFailed,
+		/// <summary>
+		/// sender is blocked by reciever
+		/// </summary>
+		UserBlocked
 	}
 }

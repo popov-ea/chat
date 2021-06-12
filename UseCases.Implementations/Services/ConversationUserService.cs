@@ -4,6 +4,7 @@ using Domain.Entities;
 using Domain.Enums;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using UseCases.Interfaces.Dtos;
@@ -19,6 +20,7 @@ namespace UseCases.Implementations.Services
 		public ConversationUserService(IRepository<ConversationUser> conversationUserRepository, Mapper mapper)
 		{
 			_conversationUserRepository = conversationUserRepository;
+			_mapper = mapper;
 		}
 		public async Task<ConversationUserServiceResultDto> AddUserAsync(long conversationId, long userId)
 		{
@@ -71,6 +73,12 @@ namespace UseCases.Implementations.Services
 			}
 			var deleted = await _conversationUserRepository.DeleteAsync(conversationUser);
 			return Ok(deleted);
+		}
+
+		public async Task<IEnumerable<ConversationUserDto>> GetConversationUsers(long conversationId)
+		{
+			var conversationUsers = await _conversationUserRepository.AllAsync((cu) => cu.ConversationId == conversationId);
+			return conversationUsers.Select((cu) => MapToDto(cu));
 		}
 	}
 }

@@ -10,12 +10,18 @@ using DataAccess.Interfaces;
 
 namespace DataAccess.EFCore
 {
-	public class EFCoreRepository<T> : IRepository<T> 
+	public class EFCoreRepository<T> : IRepository<T>
 		where T : class, IEntity
 	{
 		private readonly DbConfig _dbConfig;
 
-		public long Count => throw new NotImplementedException();
+		public long Count {
+			get
+			{
+				using var db = GetChatDb();
+				return db.Set<T>().Count();
+			}
+		}
 
 		public EFCoreRepository(DbConfig dbConfig)
 		{

@@ -1,4 +1,5 @@
-﻿using Domain.Entities;
+﻿using Auth.Interfaces;
+using Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 
 namespace DataAccess.EFCore
@@ -14,6 +15,7 @@ namespace DataAccess.EFCore
 		public DbSet<ConversationUser> ConversationUsers { get; set; }
 		public DbSet<Message> Messages { get; set; }
 		public DbSet<User> Users { get; set; }
+		public DbSet<UserCredentials> UserCredentials { get; set; }
 
 		public ChatDb(DbConfig dbConfig)
 		{
@@ -23,6 +25,12 @@ namespace DataAccess.EFCore
 		protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
 		{
 			optionsBuilder.UseNpgsql(_connectionString);
+		}
+
+		protected override void OnModelCreating(ModelBuilder modelBuilder)
+		{
+			new ModelConfiguration().ConfigureModel(modelBuilder);
+			base.OnModelCreating(modelBuilder);
 		}
 	}
 }

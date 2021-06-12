@@ -18,8 +18,7 @@ namespace UseCases.Test
 			_mapper = MapperHelpers.GetConfiguredMapper();
 		}
 
-		//TODO: wtf with null ref in mapper
-		//[Fact]
+		[Fact]
 		public async Task ShouldCreateConversationUser()
 		{
 			var conversationUserRepository = new TestRepository<ConversationUser>();
@@ -30,11 +29,10 @@ namespace UseCases.Test
 
 			await conversationUserService.AddUserAsync(conversationId, userId);
 
-			Assert.True(conversationUserRepository.Any((cu) => cu.ConversationId == conversationId && cu.UserId == userId));
+			Assert.Contains(conversationUserRepository.All(), (cu) => cu.ConversationId == conversationId && cu.UserId == userId);
 		}
 
-		//TODO: wtf with null ref in mapper
-		//[Fact]
+		[Fact]
 		public async Task ShouldDeleteConversationUser()
 		{
 			var conversationId = 1;
@@ -45,7 +43,7 @@ namespace UseCases.Test
 			await conversationUserRepository.CreateAsync(new ConversationUser() { UserId = 1, ConversationId = 1 });
 			await conversationUserService.DeleteUserAsync(conversationId, userId);
 
-			Assert.Equal(0, conversationUserRepository.Count);
+			Assert.Empty(conversationUserRepository.All());
 		}
 	}
 }

@@ -5,6 +5,11 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="6.11.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Auth\Auth.Implementation.csproj" />
     <ProjectReference Include="..\DataAccess.EFCore\DataAccess.EFCore.csproj" />
     <ProjectReference Include="..\DataAccess.Interfaces\DataAccess.Interfaces.csproj" />
     <ProjectReference Include="..\Server\Server.csproj" />

@@ -12,6 +12,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using WebApp.Middlewares;
 using WebApp.Modules;
 
 namespace WebApp
@@ -48,7 +49,7 @@ namespace WebApp
 
 			app.UseRouting();
 
-			app.UseAuthorization();
+			app.UseMiddleware<JwtMiddleware>();
 
 			app.UseEndpoints(endpoints =>
 			{

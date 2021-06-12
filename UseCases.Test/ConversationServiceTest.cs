@@ -28,8 +28,12 @@ namespace UseCases.Test
 			var chatActionRepository = new TestRepository<ChatAction>();
 			var messageRepository = new TestRepository<Message>();
 			var attachmentRepository = new TestRepository<Attachment>();
-			var messageService = new MessageService(messageRepository, attachmentRepository, _timeProvider, _attachmentContentProvider, _mapper);
+
 			var blackListService = new BlackListService(blackListRepository, _mapper);
+			var conversationUserService = new ConversationUserService(conversationUserRepository, _mapper);
+
+
+			var messageService = new MessageService(messageRepository, attachmentRepository, _timeProvider, _attachmentContentProvider, blackListService, conversationUserService, _mapper);
 			var conversationService = new ConversationService(conversationRepository, conversationUserRepository, chatActionRepository, blackListService, messageService, _timeProvider, _mapper);
 			var initiator = new User { Id = 1, Username = "name 1" };
 			var invited = new List<User>
@@ -106,7 +110,9 @@ namespace UseCases.Test
 			});
 
 			var blackListService = new BlackListService(blackListRepository, _mapper);
-			var messageService = new MessageService(messageRepository, attachmentRepository, _timeProvider, _attachmentContentProvider, _mapper);
+			var conversationUserService = new ConversationUserService(conversationUserRepository, _mapper);
+
+			var messageService = new MessageService(messageRepository, attachmentRepository, _timeProvider, _attachmentContentProvider, blackListService, conversationUserService, _mapper);
 
 			var conversation = new Conversation
 			{

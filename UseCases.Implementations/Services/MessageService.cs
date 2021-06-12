@@ -19,15 +19,20 @@ namespace UseCases.Implementations.Services
 		private readonly IRepository<Attachment> _attachmentRepository;
 		private readonly ITimeProvider _timeProvider;
 		private readonly IAttachmentContentProvider _attachmentContentProvider;
+		private readonly IBlackListService _blackListService;
+		private readonly IConversationUserService _conversationUserService;
 		private readonly Mapper _mapper;
 
 		public MessageService(IRepository<Message> messageRepository, IRepository<Attachment> attachmentRepository, ITimeProvider timeProvider,  
-			IAttachmentContentProvider attachmentContentProvider, Mapper mapper)
+			IAttachmentContentProvider attachmentContentProvider, IBlackListService blackListService, IConversationUserService conversationUserService,
+			Mapper mapper)
 		{
 			_messageRepository = messageRepository;
 			_attachmentRepository = attachmentRepository;
 			_timeProvider = timeProvider;
 			_attachmentContentProvider = attachmentContentProvider;
+			_blackListService = blackListService;
+			_conversationUserService = conversationUserService;
 			_mapper = mapper;
 		}
 
@@ -44,6 +49,13 @@ namespace UseCases.Implementations.Services
 
 		public async Task<MessageServiceResultDto> SendMessageAsync(long senderId, long conversationId, string messageText, AttachmentDto[] attachments = null)
 		{
+			var conversationUsersIds = (await _conversationUserService.GetConversationUsers(conversationId)).Select((cu) => cu.UserId).ToList();
+
+			if (conversationUsersIds.Count > 0 && await _blackListService.CheckAnyBlocked(senderId, conversationUsersIds))
+			{
+				return Fail(MessageFailCauses.UserBlocked);
+			}
+
 			var createdAttachments = new List<Attachment>();
 			if (attachments != null)
 			{
