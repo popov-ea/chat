@@ -32,9 +32,13 @@ namespace WebApp
 			var controllersAssembly = Assembly.GetAssembly(typeof(Server.Controllers.ConversationController));
 
 			services.AddControllers()
-				.PartManager.ApplicationParts.Add(new AssemblyPart(controllersAssembly));
+				.PartManager.ApplicationParts.Add(new AssemblyPart(controllersAssembly));;
+
+			services.AddSwaggerDocument();
 
 			services.RegisterApplicationModules();
+
+			services.AddTransient<JwtMiddleware>();
 		}
 
 		// This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -48,6 +52,9 @@ namespace WebApp
 			app.UseHttpsRedirection();
 
 			app.UseRouting();
+
+			app.UseOpenApi();
+			app.UseSwaggerUi3();
 
 			app.UseMiddleware<JwtMiddleware>();
 

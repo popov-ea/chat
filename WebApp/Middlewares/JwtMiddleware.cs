@@ -14,9 +14,9 @@ namespace WebApp.Middlewares
 	{
 		private readonly AuthManager _authManager;
 
-		public JwtMiddleware(AuthManager authManager)
+		public JwtMiddleware(UseCases.Interfaces.Providers.ITimeProvider timeProvider)
 		{
-			_authManager = authManager;
+			_authManager = new AuthManager(timeProvider);
 		}
 
 		public async Task InvokeAsync(HttpContext context, RequestDelegate next)

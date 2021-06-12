@@ -12,7 +12,7 @@ namespace Server.Controllers
 {
 	[ApiController]
 	[Route("conversation-user")]
-	class ConversationUserController : ControllerBase
+	public class ConversationUserController : ControllerBase
 	{
 		private readonly IConversationUserService _conversationUserService;
 

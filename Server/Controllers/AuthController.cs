@@ -13,7 +13,7 @@ namespace Server.Controllers
 {
 	[ApiController]
 	[Route("auth")]
-	class AuthController : ControllerBase
+	public class AuthController : ControllerBase
 	{
 		private readonly IAuthService _authService;
 		private readonly IUserService _userService;
@@ -26,8 +26,7 @@ namespace Server.Controllers
 			_tokenGenerator = tokenGenerator;
 		}
 
-		[Route("register")]
-		[HttpPost]
+		[HttpPost("register")]
 		public async Task<ActionResult<UserDto>> Register(RegisterDto registerDto)
 		{
 			var registerResult = await _authService.Register(registerDto.Login, registerDto.Password);
@@ -40,8 +39,7 @@ namespace Server.Controllers
 			return await _userService.CreateUserAsync(registerDto.UserInfo);
 		}
 
-		[Route("login")]
-		[HttpPost]
+		[HttpPost("login")]
 		public async Task<ActionResult<LoginResultDto>> Login(LoginDto loginDto)
 		{
 			var loginResult = await _authService.Authenticate(loginDto.Login, loginDto.Password);
