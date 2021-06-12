@@ -24,6 +24,11 @@ namespace UseCases.Implementations.Services
 		private readonly IBlackListService _blackListService;
 		private readonly Mapper _mapper;
 
+		public event Action<ConversationDto> OnConversationCreated;
+		public event Action<ConversationDto> OnConversationDeleted;
+		public event Action<ConversationDto> OnConversationUpdated;
+		public event Action<ConversationDto> OnConversationCleared;
+
 		// :/
 		public ConversationService(IRepository<Conversation> conversationRepository, IRepository<ConversationUser> conversationUserRepository,
 			IRepository<ChatAction> chatActionRepository, IBlackListService blackListService, IMessageService messageService, ITimeProvider timeProvider, Mapper mapper)
@@ -35,6 +40,17 @@ namespace UseCases.Implementations.Services
 			_conversationUserRepository = conversationUserRepository;
 			_blackListService = blackListService;
 			_mapper = mapper;
+
+			// null obj pattern
+			InitEmptyEventHandlers();
+		}
+
+		private void InitEmptyEventHandlers()
+		{
+			OnConversationCreated += (x) => { };
+			OnConversationCleared += (x) => { };
+			OnConversationDeleted += (x) => { };
+			OnConversationUpdated += (x) => { };
 		}
 
 		public async Task<ConversationServiceResultDto> CreateConversationAsync(long initiatorId, IEnumerable<long> invitedUserIds, string name = null)
@@ -60,6 +76,8 @@ namespace UseCases.Implementations.Services
 			);
 			await _chatActionRepository.CreateAsync(new ChatAction { InitiatorId = initiatorId, CreatedAt = _timeProvider.NowUtc(), Type = ChatActionType.NewChat });
 
+			OnConversationCreated(MapToDto(conversation));
+
 			var methodResult = Ok(conversation);
 
 			return methodResult;
@@ -78,7 +96,11 @@ namespace UseCases.Implementations.Services
 			await _chatActionRepository.DeleteByIdsAsync((await chatActionsAsync).Select(a => a.Id).ToArray());
 			await _messageService.DeleteByIdsAsync(actorId, (await chatMessages).Select(a => a.Id).ToArray());
 
-			return Ok(await _conversationRepository.FindAsync(conversationId));
+			var conversation = await _conversationRepository.FindAsync(conversationId);
+
+			OnConversationCleared(MapToDto(conversation));
+
+			return Ok(conversation);
 		}
 
 		private ConversationServiceResultDto Fail(ConversationFailCause failCause)
@@ -132,6 +154,9 @@ namespace UseCases.Implementations.Services
 			var conversation = await _conversationRepository.FindAsync(conversationId);
 			conversation.Name = newData.Name;
 			var updated = await _conversationRepository.UpdateAsync(conversation);
+
+			OnConversationUpdated(MapToDto(conversation));
+
 			return Ok(updated);
 		}
 
@@ -147,9 +172,11 @@ namespace UseCases.Implementations.Services
 			var conversationUsers = _conversationUserRepository.AllAsync(cu => cu.ConversationId == conversationId);
 			await _conversationUserRepository.DeleteByIdsAsync((await conversationUsers).Select(c => c.Id).ToArray());
 
-			var deleted = await _conversationRepository.DeleteByIdsAsync(conversationId);
+			var deleted = (await _conversationRepository.DeleteByIdsAsync(conversationId)).FirstOrDefault();
 
-			return Ok(deleted.FirstOrDefault());
+			OnConversationDeleted(MapToDto(deleted));
+
+			return Ok(deleted);
 		}
 	}
 }

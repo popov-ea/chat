@@ -23,6 +23,9 @@ namespace UseCases.Implementations.Services
 		private readonly IConversationUserService _conversationUserService;
 		private readonly Mapper _mapper;
 
+		public event Action<MessageDto> OnMessageSent;
+		public event Action<MessageDto[]> OnMessagesDeleted;
+
 		public MessageService(IRepository<Message> messageRepository, IRepository<Attachment> attachmentRepository, ITimeProvider timeProvider,  
 			IAttachmentContentProvider attachmentContentProvider, IBlackListService blackListService, IConversationUserService conversationUserService,
 			Mapper mapper)
@@ -34,13 +37,23 @@ namespace UseCases.Implementations.Services
 			_blackListService = blackListService;
 			_conversationUserService = conversationUserService;
 			_mapper = mapper;
+			// null obj pattern again
+			InitEmptyEventHandlers();
+		}
+
+		private void InitEmptyEventHandlers()
+		{
+			OnMessageSent += (x) => { };
+			OnMessagesDeleted += (x) => { };
 		}
 
 		public async Task<MessageServiceResultDto> DeleteByIdsAsync(long actorId, params long[] messageIds)
 		{
-			await _messageRepository.DeleteByIdsAsync(messageIds);
+			var deleted = await _messageRepository.DeleteByIdsAsync(messageIds);
 			var attachments = await GetMessagesAttachments(messageIds);
 			await _attachmentRepository.DeleteByIdsAsync(attachments.Select(a => a.Id).ToArray());
+
+			OnMessagesDeleted(deleted.Select((m) => MapToDto(m)).ToArray());
 
 			var methodResult = Ok(null);
 
@@ -81,6 +94,8 @@ namespace UseCases.Implementations.Services
 				CreatedAt = _timeProvider.NowUtc()
 			});
 
+			OnMessageSent(MapToDto(newMsg));
+
 			var methodResult = Ok(newMsg);
 
 			return methodResult;
@@ -101,7 +116,7 @@ namespace UseCases.Implementations.Services
 		{
 			return new MessageServiceResultDto
 			{
-				Entity = _mapper.Map<Message, MessageDto>(msg),
+				Entity = MapToDto(msg),
 				Success = true
 			};
 		}
@@ -113,6 +128,11 @@ namespace UseCases.Implementations.Services
 				FailCause = failCause,
 				Success = false
 			};
+		}
+
+		private MessageDto MapToDto(Message msg)
+		{
+			return _mapper.Map<Message, MessageDto>(msg);
 		}
 	}
 }

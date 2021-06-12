@@ -22,6 +22,7 @@ namespace UseCases.Test
 		[Fact]
 		public async Task ShouldCreateConversationCorrectly()
 		{
+			var firedEventsCount = 0;
 			var conversationRepository = new TestRepository<Conversation>();
 			var conversationUserRepository = new TestRepository<ConversationUser>();
 			var blackListRepository = new TestRepository<BlackList>();
@@ -35,6 +36,9 @@ namespace UseCases.Test
 
 			var messageService = new MessageService(messageRepository, attachmentRepository, _timeProvider, _attachmentContentProvider, blackListService, conversationUserService, _mapper);
 			var conversationService = new ConversationService(conversationRepository, conversationUserRepository, chatActionRepository, blackListService, messageService, _timeProvider, _mapper);
+
+			conversationService.OnConversationCreated += (conversationService) => firedEventsCount++;
+
 			var initiator = new User { Id = 1, Username = "name 1" };
 			var invited = new List<User>
 			{
@@ -51,14 +55,11 @@ namespace UseCases.Test
 			};
 
 			var response = await conversationService.CreateConversationAsync(initiator.Id, invited.Select(u => u.Id));
-			var conversationCreated = conversationRepository.AnyAsync(c => c.Id == response.Entity.Id);
-			var chatActionCreated = chatActionRepository.AnyAsync(c => c.Type == ChatActionType.NewChat && c.ConversationId == response.Entity.Id);
-			var conversationUsersCreated = invited.Union(new User[] { initiator })
-				.All(u => conversationUserRepository.Any(cu => cu.ConversationId == response.Entity.Id && cu.UserId == u.Id));
 
-			var allCreated = (new bool[] { await conversationCreated, await chatActionCreated, conversationUsersCreated }).All(i => i == true);
-
-			Assert.True(allCreated);	
+			Assert.Contains(conversationRepository.All(), c => c.Id == response.Entity.Id);
+			Assert.Contains(chatActionRepository.All(), c => c.Type == ChatActionType.NewChat && c.ConversationId == response.Entity.Id);
+			Assert.Contains(invited.Union(new User[] { initiator }), u => conversationUserRepository.Any(cu => cu.ConversationId == response.Entity.Id && cu.UserId == u.Id));
+			Assert.Equal(1, firedEventsCount);
 		}
 
 		[Fact]
@@ -66,6 +67,8 @@ namespace UseCases.Test
 		{
 			const long conversationId = 1;
 			const long messageId = 1;
+
+			var firedEventsCount = 0;
 
 			var initiator = new User { Id = 1 };
 			var invited = new List<User>
@@ -112,6 +115,7 @@ namespace UseCases.Test
 			var blackListService = new BlackListService(blackListRepository, _mapper);
 			var conversationUserService = new ConversationUserService(conversationUserRepository, _mapper);
 
+
 			var messageService = new MessageService(messageRepository, attachmentRepository, _timeProvider, _attachmentContentProvider, blackListService, conversationUserService, _mapper);
 
 			var conversation = new Conversation
@@ -126,14 +130,15 @@ namespace UseCases.Test
 			});
 			var conversationService = new ConversationService(conversationRepository, conversationUserRepository, chatActionRepository, blackListService, messageService, _timeProvider, _mapper);
 
+			conversationService.OnConversationDeleted += (c) => firedEventsCount++;
+
 			await conversationService.DeleteConversationAsync(initiator.Id, conversation.Id);
 
-			var allHistoryCleared = conversationRepository.Count == 0
-				&& messageRepository.Count == 0
-				&& attachmentRepository.Count == 0
-				&& conversationUserRepository.Count == 0;
-
-			Assert.True(allHistoryCleared);
+			Assert.Empty(conversationRepository.All());
+			Assert.Empty(messageRepository.All());
+			Assert.Empty(attachmentRepository.All());
+			Assert.Empty(conversationUserRepository.All());
+			Assert.Equal(1, firedEventsCount);
 		}
 	}
 }

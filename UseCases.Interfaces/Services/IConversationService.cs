@@ -14,5 +14,25 @@ namespace UseCases.Interfaces.Services
 		public Task<ConversationDto> GetConversationAsync(long conversationId);
 		public Task<IEnumerable<ConversationDto>> GetAllConversationsAsync();
 		public Task<ConversationServiceResultDto> UpdateConversationAsync(long conversationId, ConversationDto newData);
+
+		/// <summary>
+		/// Fires when conversation was created
+		/// </summary>
+		public event Action<ConversationDto> OnConversationCreated;
+
+		/// <summary>
+		/// Fires when conversation was deleted
+		/// </summary>
+		public event Action<ConversationDto> OnConversationDeleted;
+
+		/// <summary>
+		/// Fires when conversation was updated
+		/// </summary>
+		public event Action<ConversationDto> OnConversationUpdated;
+
+		/// <summary>
+		/// Fires when conversation was cleared
+		/// </summary>
+		public event Action<ConversationDto> OnConversationCleared;
 	}
 }

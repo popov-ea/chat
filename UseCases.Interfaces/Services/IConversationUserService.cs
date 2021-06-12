@@ -13,5 +13,15 @@ namespace UseCases.Interfaces.Services
 		public Task<ConversationUserServiceResultDto> DeleteUserAsync(long conversationId, long userId);
 		public Task<ConversationUserServiceResultDto> DeleteUserAsync(long conversationUserId);
 		public Task<IEnumerable<ConversationUserDto>> GetConversationUsers(long conversationId);
+
+		/// <summary>
+		/// Fires when user was added to conversation
+		/// </summary>
+		public event Action<ConversationUserDto> OnUserAdded;
+
+		/// <summary>
+		/// Fires when user was deleted from conversation
+		/// </summary>
+		public event Action<ConversationUserDto> OnUserDeleted;
 	}
 }

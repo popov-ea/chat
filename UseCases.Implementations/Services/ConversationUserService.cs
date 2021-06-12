@@ -17,11 +17,24 @@ namespace UseCases.Implementations.Services
 	{
 		private readonly IRepository<ConversationUser> _conversationUserRepository;
 		private readonly Mapper _mapper;
+
+		public event Action<ConversationUserDto> OnUserAdded;
+		public event Action<ConversationUserDto> OnUserDeleted;
+
 		public ConversationUserService(IRepository<ConversationUser> conversationUserRepository, Mapper mapper)
 		{
 			_conversationUserRepository = conversationUserRepository;
 			_mapper = mapper;
+			// null obj pattern
+			InitEmptyEventHandlers();
 		}
+
+		private void InitEmptyEventHandlers()
+		{
+			OnUserAdded += (x) => { };
+			OnUserDeleted += (x) => { };
+		}
+
 		public async Task<ConversationUserServiceResultDto> AddUserAsync(long conversationId, long userId)
 		{
 			var conversationUser = await _conversationUserRepository.CreateAsync(new ConversationUser()
@@ -29,12 +42,18 @@ namespace UseCases.Implementations.Services
 				UserId = userId,
 				ConversationId = conversationId
 			});
+
+			OnUserAdded(MapToDto(conversationUser));
+
 			return Ok(conversationUser);
 		}
 
 		public async Task<ConversationUserServiceResultDto> DeleteUserAsync(long conversationId, long userId)
 		{
 			var conversationUser = await _conversationUserRepository.FirstOrDefaultAsync((cu) => cu.ConversationId == conversationId && cu.UserId == userId);
+
+			OnUserDeleted(MapToDto(conversationUser));
+
 			return await DeleteUserAsync(conversationUser);
 		}
 

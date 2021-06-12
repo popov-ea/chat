@@ -22,6 +22,7 @@ namespace UseCases.Test
 		[Fact]
 		public async Task ShouldSendMessage()
 		{
+			var firedEventsCount = 0;
 			var blackListRepository = new TestRepository<BlackList>();
 			var messageRepository = new TestRepository<Message>();
 			var conversationUserRepository = new TestRepository<ConversationUser>();
@@ -42,17 +43,19 @@ namespace UseCases.Test
 				Id = 1
 			};
 
+			messageService.OnMessageSent += (m) => firedEventsCount++;
+
 			await messageService.SendMessageAsync(sender.Id, conversation.Id, "test", new AttachmentDto[] { new AttachmentDto { Id = 1, MessageId = 1 } });
 
-			var allAdded = messageRepository.Count == 1
-				&& attachmentRepository.Count == 1;
-
-			Assert.True(allAdded);
+			Assert.Single(messageRepository.All());
+			Assert.Single(attachmentRepository.All());
+			Assert.Equal(1, firedEventsCount);
 		}
 
 		[Fact]
 		public async Task ShouldDeleteMessage()
 		{
+			var firedEventsCount = 0;
 			var blackListRepository = new TestRepository<BlackList>();
 			var messageRepository = new TestRepository<Message>();
 			var conversationRepository = new TestRepository<Conversation>();
@@ -72,17 +75,21 @@ namespace UseCases.Test
 				Id = 1
 			};
 
+			messageService.OnMessagesDeleted += (m) => firedEventsCount++;
+
 			var result = await messageService.SendMessageAsync(sender.Id,
 				conversation.Id, "test", new AttachmentDto[] { new AttachmentDto { Id = 1, MessageId = 0 } });
 			await messageService.DeleteByIdsAsync(sender.Id, result.Entity.Id);
 
 			Assert.Empty(messageRepository.All());
 			Assert.Empty(attachmentRepository.All());
+			Assert.Equal(1, firedEventsCount);
 		}
 
 		[Fact]
 		public async Task ShouldNotSendToBlockedUser()
 		{
+			var firedEventsCount = 0;
 			var senderId = 1;
 			var blockerId = 2;
 			var conversationId = 1;
@@ -125,12 +132,14 @@ namespace UseCases.Test
 				blackListService, 
 				conversationUserService, 
 				_mapper);
+			messageService.OnMessageSent += (m) => firedEventsCount++;
 			
 
 			await messageService.SendMessageAsync(sender.Id, conversation.Id, "test", new AttachmentDto[] { new AttachmentDto { Id = 1, MessageId = 1 } });
 
 			Assert.Empty(messageRepository.All());
 			Assert.Empty(attachmentRepository.All());
+			Assert.Equal(0, firedEventsCount);
 		}
 	}
 }
