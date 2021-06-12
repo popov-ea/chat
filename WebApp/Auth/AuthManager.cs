@@ -11,7 +11,7 @@ using UseCases.Interfaces.Providers;
 
 namespace WebApp.Auth
 {
-	class AuthManager
+	public class AuthManager
 	{
 		private readonly ITimeProvider _timeProvider;
 		//TODO: вынеси и сделай норм, черт

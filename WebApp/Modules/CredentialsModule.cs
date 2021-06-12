@@ -6,6 +6,8 @@ using System.Threading.Tasks;
 using Auth.Implementation;
 using Auth.Interfaces;
 using DataAccess.EFCore;
+using Server.Interfaces;
+using WebApp.Auth;
 
 namespace WebApp.Modules
 {
@@ -15,6 +17,7 @@ namespace WebApp.Modules
 		{
 			serviceCollection.AddScoped<IAuthService, AuthService>();
 			serviceCollection.AddScoped<ICredentialsRepository, EFCoreCredentialsRepository>();
+			serviceCollection.AddScoped<IAuthorizationTokenGenerator, AuthTokenGenerator>();
 		}
 	}
 }
