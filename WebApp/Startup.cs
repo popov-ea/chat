@@ -12,6 +12,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Server.Hubs;
 using WebApp.Middlewares;
 using WebApp.Modules;
 
@@ -38,6 +39,8 @@ namespace WebApp
 
 			services.RegisterApplicationModules();
 
+			services.AddSignalR();
+
 			services.AddTransient<JwtMiddleware>();
 		}
 
@@ -61,6 +64,7 @@ namespace WebApp
 			app.UseEndpoints(endpoints =>
 			{
 				endpoints.MapControllers();
+				endpoints.MapHub<ConversationHub>("/enter-chat");
 			});
 		}
 	}

@@ -25,26 +25,5 @@ namespace Server.Controllers
 		{
 			return _messageService.GetMessagesByConversationId(conversationId);
 		}
-
-		[HttpPost]
-		public async Task<ActionResult<MessageDto>> SendMessage(long conversationId, long senderId, string messageText, AttachmentDto[] attachments)
-		{
-			var result = await _messageService.SendMessageAsync(senderId, conversationId, messageText, attachments);
-			return HandleMessageServiceResult(result);
-		}
-
-		[HttpDelete]
-		public async Task<ActionResult<MessageDto>> DeleteMessage(long messageId)
-		{
-			//TODO: сделай норм
-			var userId = 0;
-			var result = await _messageService.DeleteByIdsAsync(userId, messageId);
-			return HandleMessageServiceResult(result);
-		}
-
-		private ActionResult<MessageDto> HandleMessageServiceResult(MessageServiceResultDto result) => result.Success
-			? result.Entity
-			: HanldeFail(result);
-		private ActionResult<MessageDto> HanldeFail(MessageServiceResultDto result) => new StatusCodeResult(500);
 	}
 }

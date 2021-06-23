@@ -14,6 +14,7 @@ namespace UseCases.Interfaces.Services
 		public Task<ConversationDto> GetConversationAsync(long conversationId);
 		public Task<IEnumerable<ConversationDto>> GetAllConversationsAsync();
 		public Task<ConversationServiceResultDto> UpdateConversationAsync(long conversationId, ConversationDto newData);
+		public Task<long[]> GetUserConversationIdsAsync(long userId);
 
 		/// <summary>
 		/// Fires when conversation was created

@@ -178,5 +178,10 @@ namespace UseCases.Implementations.Services
 
 			return Ok(deleted);
 		}
+
+		public async Task<long[]> GetUserConversationIdsAsync(long userId)
+		{
+			return (await _conversationUserRepository.AllAsync((cu) => cu.UserId == userId)).Select((cu) => cu.ConversationId).ToArray();
+		}
 	}
 }
