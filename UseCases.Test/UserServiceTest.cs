@@ -17,7 +17,7 @@ namespace UseCases.Test
 		{
 			var dto = new UserDto
 			{
-				Username = "test"
+				UserName = "test"
 			};
 
 			var mapper = MapperHelpers.GetConfiguredMapper();
@@ -26,7 +26,7 @@ namespace UseCases.Test
 
 			await userService.CreateUserAsync(dto);
 
-			Assert.Contains(await repository.AllAsync(), (u) => u.Username == dto.Username);
+			Assert.Contains(await repository.AllAsync(), (u) => u.Username == dto.UserName);
 		}
 	}
 }

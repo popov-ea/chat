@@ -8,7 +8,7 @@ namespace Server.Dtos
 {
 	public class RegisterDto
 	{
-		public UserDto UserInfo { get; set; }
+		public string UserName { get; set; }
 
 		public string Login { get; set; }
 		public string Password { get; set; }

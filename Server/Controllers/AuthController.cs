@@ -27,7 +27,7 @@ namespace Server.Controllers
 		}
 
 		[HttpPost("register")]
-		public async Task<ActionResult<UserDto>> Register(RegisterDto registerDto)
+		public async Task<ActionResult<LoginResultDto>> Register(RegisterDto registerDto)
 		{
 			var registerResult = await _authService.Register(registerDto.Login, registerDto.Password);
 
@@ -36,13 +36,23 @@ namespace Server.Controllers
 				return BadRequest();
 			}
 
-			return await _userService.CreateUserAsync(registerDto.UserInfo);
+			await _userService.CreateUserAsync(new UserDto
+			{
+				UserName = registerDto.UserName
+			});
+
+			return await Login(registerDto.Login, registerDto.Password);
 		}
 
 		[HttpPost("login")]
 		public async Task<ActionResult<LoginResultDto>> Login(LoginDto loginDto)
 		{
-			var loginResult = await _authService.Authenticate(loginDto.Login, loginDto.Password);
+			return await Login(loginDto.Login, loginDto.Password);
+		}
+
+		private async Task<ActionResult<LoginResultDto>> Login(string login, string password)
+		{
+			var loginResult = await _authService.Authenticate(login, password);
 
 			if (!loginResult.Succeed)
 			{
@@ -52,8 +62,10 @@ namespace Server.Controllers
 			var userDto = await _userService.GetUserAsync(loginResult.Credentials.UserId);
 			var token = _tokenGenerator.GenerateToken(loginResult.Credentials);
 
-			return new LoginResultDto {
-				UserDto = userDto,
+			return new LoginResultDto
+			{
+				UserId = userDto.Id,
+				UserName = userDto.UserName,
 				Token = token
 			};
 		}
