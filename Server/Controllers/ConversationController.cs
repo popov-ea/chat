@@ -25,8 +25,6 @@ namespace Server.Controllers
 		public async Task<ConversationDto> GetConversation(long conversationId) 
 		{
 			return await _conversationService.GetConversationAsync(conversationId);
-		}
-
-		
+		}		
 	}
 }

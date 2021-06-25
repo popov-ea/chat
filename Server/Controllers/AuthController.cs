@@ -1,6 +1,7 @@
 ﻿using Auth.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using Server.Dtos;
+using Server.Filters;
 using Server.Interfaces;
 using System;
 using System.Collections.Generic;
@@ -48,6 +49,13 @@ namespace Server.Controllers
 		public async Task<ActionResult<LoginResultDto>> Login(LoginDto loginDto)
 		{
 			return await Login(loginDto.Login, loginDto.Password);
+		}
+
+		[AuthFilter]
+		[HttpPost("verify-auth")]
+		public void Verify()
+		{
+			//nothing to do here, checking user in auth filter
 		}
 
 		private async Task<ActionResult<LoginResultDto>> Login(string login, string password)

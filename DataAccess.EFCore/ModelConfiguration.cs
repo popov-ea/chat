@@ -52,6 +52,8 @@ namespace DataAccess.EFCore
 		private void ConfigureBlackList(ModelBuilder modelBuilder)
 		{
 			modelBuilder.Entity<BlackList>().HasKey((bl) => bl.Id);
+			modelBuilder.Entity<BlackList>().HasOne<User>((bl) => bl.Blocked);
+			modelBuilder.Entity<BlackList>().HasOne<User>((bl) => bl.Initiator);
 		}
 
 		private void ConfigureAttachment(ModelBuilder modelBuilder)

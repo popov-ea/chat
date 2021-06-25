@@ -6,7 +6,7 @@ namespace DataAccess.EFCore
 {
 	internal class ChatDb : DbContext
 	{
-		private string _connectionString;
+		private static string _connectionString = ConfigurationHelpers.GetConnectionString();
 
 		public DbSet<Attachment> Attachments { get; set; }
 		public DbSet<BlackList> BlackLists { get; set; }
@@ -17,9 +17,9 @@ namespace DataAccess.EFCore
 		public DbSet<User> Users { get; set; }
 		public DbSet<UserCredentials> UserCredentials { get; set; }
 
-		public ChatDb(DbConfig dbConfig)
+		public ChatDb()
 		{
-			_connectionString = dbConfig.ConnectionString;
+
 		}
 
 		protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)

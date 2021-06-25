@@ -13,7 +13,6 @@ namespace DataAccess.EFCore
 	public class EFCoreRepository<T> : IRepository<T>
 		where T : class, IEntity
 	{
-		private readonly DbConfig _dbConfig;
 
 		public long Count {
 			get
@@ -21,11 +20,6 @@ namespace DataAccess.EFCore
 				using var db = GetChatDb();
 				return db.Set<T>().Count();
 			}
-		}
-
-		public EFCoreRepository(DbConfig dbConfig)
-		{
-			_dbConfig = dbConfig;
 		}
 
 		public IEnumerable<T> All(Func<T, bool> predicate)
@@ -196,6 +190,6 @@ namespace DataAccess.EFCore
 			return entity;
 		}
 
-		private ChatDb GetChatDb() => new ChatDb(_dbConfig);
+		private ChatDb GetChatDb() => new ChatDb();
 	}
 }

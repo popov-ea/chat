@@ -10,13 +10,6 @@ namespace DataAccess.EFCore
 {
 	public class EFCoreCredentialsRepository : ICredentialsRepository
 	{
-		private readonly DbConfig _dbConfig;
-
-		public EFCoreCredentialsRepository(DbConfig dbConfig)
-		{
-			_dbConfig = dbConfig;
-		}
-
 		public async Task<bool> CheckLoginExistsAsync(string login)
 		{
 			using var db = GetChatDb();
@@ -55,6 +48,6 @@ namespace DataAccess.EFCore
 			};
 		}
 
-		private ChatDb GetChatDb() => new ChatDb(_dbConfig);
+		private ChatDb GetChatDb() => new ChatDb();
 	}
 }

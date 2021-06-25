@@ -14,14 +14,6 @@ namespace WebApp.Modules
 	{
 		public static void Register(IServiceCollection services)
 		{
-			//services.AddScoped<IRepository<IEntity>, EFCoreRepository<IEntity>>();
-			services.AddScoped<DbConfig>((provider) =>
-			{
-				return new DbConfig
-				{
-					ConnectionString = ""
-				};
-			});
 			services.AddScoped<IRepository<Attachment>, EFCoreRepository<Attachment>>();
 			services.AddScoped<IRepository<BlackList>, EFCoreRepository<BlackList>>();
 			services.AddScoped<IRepository<ChatAction>, EFCoreRepository<ChatAction>>();
